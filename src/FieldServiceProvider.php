@@ -21,6 +21,7 @@ class FieldServiceProvider extends ServiceProvider
         });
     }
 
+
     /**
      * Register any application services.
      *

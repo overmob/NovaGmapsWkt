@@ -1,4 +1,5 @@
 Nova.booting((Vue, router, store) => {
-    Vue.component('index-leaflet-map', require('./components/IndexField'))
-    Vue.component('form-leaflet-map', require('./components/FormField'))
+    Vue.component('index-nova-gmaps-wkt', require('./components/IndexField'))
+    Vue.component('detail-nova-gmaps-wkt', require('./components/DetailField'))
+    Vue.component('form-nova-gmaps-wkt', require('./components/FormField'))
 })
