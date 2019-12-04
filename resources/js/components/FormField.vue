@@ -2,7 +2,14 @@
 
     <default-field :field="field" :errors="errors">
         <template slot="field">
-            <div v-bind:id="field.mapId" style="width: 100%;" :style="'height: ' + field.height">
+            <div class="map-container">
+                <div v-bind:id="field.mapId" style="width: 100%;" :style="'height: ' + field.height">
+                </div>
+                <div class="clear-button" v-on:click="clearMap">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#666666">
+                        <path d="M8 6V4c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2h5a1 1 0 0 1 0 2h-1v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8H3a1 1 0 1 1 0-2h5zM6 8v12h12V8H6zm8-2V4h-4v2h4zm-4 4a1 1 0 0 1 1 1v6a1 1 0 0 1-2 0v-6a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v6a1 1 0 0 1-2 0v-6a1 1 0 0 1 1-1z"/>
+                    </svg>
+                </div>
             </div>
         </template>
     </default-field>
@@ -22,7 +29,6 @@
         data: () => ({
             google: undefined,
             gmap: undefined,
-            // wkt: undefined,
             features: [],
         }),
 
@@ -61,7 +67,6 @@
                 google.maps.event.addListener(that.gmap, 'tilesloaded', function () {
                     if (!this.loaded) {
                         this.loaded = true;
-                        // NOTE: We start with a MULTIPOLYGON; these aren't easily deconstructed, so we won't set this object to be editable in this example
                         that.mapIt();
                     }
                 });
@@ -113,8 +118,7 @@
                     that.features.push(event.overlay);
                     wkt = new Wkt.Wkt();
                     wkt.fromObject(event.overlay);
-                    that.field.wkt = wkt.write();
-                    that.handleChange(that.field.wkt);
+                    that.handleChange(wkt.write());
                 });
 
             });
@@ -122,14 +126,14 @@
 
         methods: {
             setInitialValue() {
-                this.value = this.field.wkt || ''
+                this.value = this.field.value || ''
             },
 
             /**
              * Fill the given FormData object with the field's internal value.
              */
             fill(formData) {
-                // formData.append(this.field.attribute, this.value || '')
+                formData.append(this.field.attribute, this.value || '')
             },
 
             /**
@@ -139,18 +143,18 @@
                 this.value = value
             },
             mapIt() {
-                if (!this.field.wkt || this.field.wkt === "")
+                if (!this.value || this.value === "")
                     return;
 
                 var wkt = new Wkt.Wkt();
                 try { // Catch any malformed WKT strings
-                    wkt.read(this.field.wkt);
+                    wkt.read(this.value);
                 } catch (e1) {
                     try {
-                        wkt.read(this.field.wkt.replace('\n', '').replace('\r', '').replace('\t', ''));
+                        wkt.read(this.value.replace('\n', '').replace('\r', '').replace('\t', ''));
                     } catch (e2) {
                         if (e2.name === 'WKTError') {
-                            console.error("Invalid WKT")
+                            console.error("Invalid WKT");
                             return;
                         }
                     }
@@ -220,20 +224,19 @@
                 var i;
                 // Reset the remembered last string (so that we can clear the map,
                 //  paste the same string, and see it again)
-                this.field.wkt = '';
+                this.value = '';
                 for (i in this.features) {
                     if (this.features.hasOwnProperty(i)) {
                         this.features[i].setMap(null);
                     }
                 }
                 this.features.length = 0;
-                this.handleChange(this.field.wkt);
+                this.handleChange(this.value);
             },
             updateWktString() {
                 var wkt = new Wkt.Wkt();
                 wkt.fromObject(this.features[0]);
-                this.field.wkt = wkt.write();
-                this.handleChange(this.field.wkt);
+                this.handleChange(wkt.write());
             },
             updateWktStringPart() {
                 var i, w, v;
@@ -244,9 +247,31 @@
                     w.merge(v);
                     i += 1;
                 }
-                this.field.wkt = w.write();
-                this.handleChange(this.field.wkt);
+                this.handleChange(wkt.write());
             },
         },
     }
 </script>
+<style>
+    .map-container {
+        position: relative;
+    }
+
+    .clear-button {
+        cursor: pointer;
+        width: 24px;
+        height: 24px;
+        padding: 4px;
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: white;
+        border-radius: 2px;
+        box-shadow: rgba(0, 0, 0, 0.3) 0 1px 4px -1px;
+    }
+
+    .clear-button:hover {
+        background: #eee;
+    }
+
+</style>

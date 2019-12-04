@@ -44,13 +44,6 @@ class NovaGmapsWkt extends Field
         ]);
     }
 
-    public function wkt($wkt)
-    {
-        return $this->withMeta([
-            'wkt' => $wkt
-        ]);
-    }
-
     public function style($drawStrokeColor = '#990000', $drawFillColor = '#EEFFCC', $drawFillOpacity = 0.6)
     {
         return $this->withMeta([
