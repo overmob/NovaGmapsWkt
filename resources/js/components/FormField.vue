@@ -30,6 +30,7 @@
             google: undefined,
             gmap: undefined,
             features: [],
+            base64img: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAAZCAYAAADXPsWXAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyNpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQwIDc5LjE2MDQ1MSwgMjAxNy8wNS8wNi0wMTowODoyMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIChNYWNpbnRvc2gpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjM2RDdCMTZGMEVCQjExRUE4MDczOTczQzYyQzVBMTg5IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjM2RDdCMTcwMEVCQjExRUE4MDczOTczQzYyQzVBMTg5Ij4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6MzZEN0IxNkQwRUJCMTFFQTgwNzM5NzNDNjJDNUExODkiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MzZEN0IxNkUwRUJCMTFFQTgwNzM5NzNDNjJDNUExODkiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz5VXMcaAAABZklEQVR42pyVzysFURTHr3l+RT3PUsKejSRlx8LGxl/wspBkb8nG0lJWYvHYIUmUYuOx9mxkRVGShddIkjw/Pqfu1DSdOz/eqc9tuufM9557+94Zz+gxAdvwBL/gwwlMQ6NJiB4owTv8KXzDBYy5BAbhzvGyJjYTFeiC+5QCATWYDItsZBQIkIULOYYRWIFmZYuvcG3b71TyMvcoD+uOVQ6gzxbnYdFRd2YchynqBWXlPaX2wWPoVYovrTeicajM5UXkS0m0OWzQrszVRORWSYxDf2SuCYpKbVVETrUWYR+mrIuHYQdGldobGYbgLcYLVfiJyc9KJxUox9wn8YLnyMnhH3lWbdPUF7vwHD60SkbLf8KACbUptl7O2MVWcKjhaIDjlF28QLdLXbzxkUJkPqnNpQSBc8glibTYT6Am4CtONnHb8hWRuaweKEYESnV6yaxagSvocBUl/UMWoBXW7P1S41+AAQBLg7MOrTBxVgAAAABJRU5ErkJggg=="
         }),
 
         mounted() {
@@ -41,8 +42,7 @@
                 that.gmap = new google.maps.Map(document.getElementById(that.field.mapId), {
                     center: new google.maps.LatLng(that.field.lat, that.field.lng),
                     defaults: {
-                        icon: 'red_dot.png',
-                        shadow: 'dot_shadow.png',
+                        icon: that.base64img,
                         editable: true,
                         strokeColor: that.field.drawStrokeColor,
                         fillColor: that.field.drawFillColor,
@@ -74,12 +74,7 @@
                 that.gmap.drawingManager = new google.maps.drawing.DrawingManager({
                     drawingControlOptions: {
                         position: google.maps.ControlPosition.TOP_CENTER,
-                        drawingModes: [
-                            // google.maps.drawing.OverlayType.MARKER,
-                            // google.maps.drawing.OverlayType.POLYLINE,
-                            google.maps.drawing.OverlayType.POLYGON
-                            // google.maps.drawing.OverlayType.RECTANGLE
-                        ]
+                        drawingModes: that.field.drawingModes
                     },
                     markerOptions: that.gmap.defaults,
                     polygonOptions: that.gmap.defaults,
@@ -162,16 +157,17 @@
 
                 var obj = wkt.toObject(this.gmap.defaults);
                 if (!Wkt.isArray(obj) && wkt.type !== 'point') {
+                    var that = this;
                     this.google.maps.event.addListener(obj.getPath(), 'insert_at', function (n) {
-                        this.updateWktString();
+                        that.updateWktString();
                     });
                     // Existing vertex is removed (insertion is undone)
                     this.google.maps.event.addListener(obj.getPath(), 'remove_at', function (n) {
-                        this.updateWktString();
+                        that.updateWktString();
                     });
                     // Existing vertex is moved (set elsewhere)
                     this.google.maps.event.addListener(obj.getPath(), 'set_at', function (n) {
-                        this.updateWktString();
+                        that.updateWktString();
                     });
                 } else {
                     if (obj.setEditable) {
@@ -218,6 +214,15 @@
                         }
                     }
                 }
+
+                // center to polygon
+                var bound = new this.google.maps.LatLngBounds();
+                for (const pos of obj.getPath().g) {
+                    var position = new this.google.maps.LatLng(pos.lat(), pos.lng())
+                    bound.extend(position)
+                }
+                this.gmap.fitBounds(bound);
+
                 return obj;
             },
             clearMap() {

@@ -52,4 +52,13 @@ class NovaGmapsWkt extends Field
             'drawFillOpacity' => $drawFillOpacity
         ]);
     }
+
+    // ['marker', 'circle', 'polygon', 'polyline', 'rectangle']
+    public function drawingModes($drawingModes)
+    {
+        return $this->withMeta([
+            'drawingModes' => $drawingModes
+        ]);
+    }
+
 }
