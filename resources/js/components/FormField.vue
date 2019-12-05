@@ -5,7 +5,7 @@
             <div class="map-container">
                 <div v-bind:id="field.mapId" style="width: 100%;" :style="'height: ' + field.height">
                 </div>
-                <div class="clear-button" v-on:click="clearMap">
+                <div class="clear-button" v-on:click="clearMap" v-if="!field.readonly">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#666666">
                         <path d="M8 6V4c0-1.1.9-2 2-2h4a2 2 0 0 1 2 2v2h5a1 1 0 0 1 0 2h-1v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8H3a1 1 0 1 1 0-2h5zM6 8v12h12V8H6zm8-2V4h-4v2h4zm-4 4a1 1 0 0 1 1 1v6a1 1 0 0 1-2 0v-6a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v6a1 1 0 0 1-2 0v-6a1 1 0 0 1 1-1z"/>
                     </svg>
@@ -74,7 +74,7 @@
                 that.gmap.drawingManager = new google.maps.drawing.DrawingManager({
                     drawingControlOptions: {
                         position: google.maps.ControlPosition.TOP_CENTER,
-                        drawingModes: that.field.drawingModes
+                        drawingModes: that.field.readonly ? [] : that.field.drawingModes
                     },
                     markerOptions: that.gmap.defaults,
                     polygonOptions: that.gmap.defaults,
@@ -222,6 +222,10 @@
                     bound.extend(position)
                 }
                 this.gmap.fitBounds(bound);
+
+                if(this.field.readonly){
+                    obj.setEditable(false);
+                }
 
                 return obj;
             },
