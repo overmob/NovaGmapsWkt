@@ -3,6 +3,7 @@
     <default-field :field="field" :errors="errors">
         <template slot="field">
             <div class="map-container">
+                <div v-on:click="show()">test</div>
                 <div v-bind:id="field.mapId" style="width: 100%;" :style="'height: ' + field.height">
                 </div>
                 <div class="clear-button" v-on:click="clearMap" v-if="!field.readonly">
@@ -71,12 +72,15 @@
                     }
                 });
 
+                var markerOption = that.gmap.defaults;
+                markerOption.draggable = true;
+
                 that.gmap.drawingManager = new google.maps.drawing.DrawingManager({
                     drawingControlOptions: {
                         position: google.maps.ControlPosition.TOP_CENTER,
                         drawingModes: that.field.readonly ? [] : that.field.drawingModes
                     },
-                    markerOptions: that.gmap.defaults,
+                    markerOptions: markerOption,
                     polygonOptions: that.gmap.defaults,
                     polylineOptions: that.gmap.defaults,
                     rectangleOptions: that.gmap.defaults
@@ -106,6 +110,11 @@
                     } else if (event.type === google.maps.drawing.OverlayType.RECTANGLE) { // Rectangle drawn
                         // Listen for the 'bounds_changed' event and update the geometry
                         google.maps.event.addListener(event.overlay, 'bounds_changed', function () {
+                            that.updateWktString();
+                        });
+                    } else {
+                        // drag marker
+                        google.maps.event.addListener(event.overlay, 'dragend', function () {
                             that.updateWktString();
                         });
                     }
@@ -170,8 +179,13 @@
                         that.updateWktString();
                     });
                 } else {
+                    var that = this;
+                    // drag marker
+                    this.google.maps.event.addListener(obj, 'dragend', function () {
+                        that.updateWktString();
+                    });
                     if (obj.setEditable) {
-                        obj.setEditable(false);
+                        obj.setEditable(true);
                     }
                 }
 
@@ -216,16 +230,20 @@
                 }
 
                 // center to polygon
-                var bound = new this.google.maps.LatLngBounds();
-                for (const pos of obj.getPath().g) {
-                    var position = new this.google.maps.LatLng(pos.lat(), pos.lng())
-                    bound.extend(position)
-                }
-                this.gmap.fitBounds(bound);
+                if(wkt.type !== 'point'){
+                    var bound = new this.google.maps.LatLngBounds();
+                    for (const pos of obj.getPath().g) {
+                        var position = new this.google.maps.LatLng(pos.lat(), pos.lng())
+                        bound.extend(position)
+                    }
 
-                if(this.field.readonly){
-                    obj.setEditable(false);
+                    this.gmap.fitBounds(bound);
+
+                    if (this.field.readonly) {
+                        obj.setEditable(false);
+                    }
                 }
+
 
                 return obj;
             },
@@ -258,6 +276,10 @@
                 }
                 this.handleChange(wkt.write());
             },
+            show() {
+                console.log("show")
+                console.log(this.value)
+            }
         },
     }
 </script>
