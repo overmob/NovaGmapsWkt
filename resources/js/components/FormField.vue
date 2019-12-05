@@ -73,7 +73,9 @@
                 });
 
                 var markerOption = that.gmap.defaults;
-                markerOption.draggable = true;
+                if (!that.field.readonly) {
+                    markerOption.draggable = true;
+                }
 
                 that.gmap.drawingManager = new google.maps.drawing.DrawingManager({
                     drawingControlOptions: {
@@ -81,9 +83,9 @@
                         drawingModes: that.field.readonly ? [] : that.field.drawingModes
                     },
                     markerOptions: markerOption,
-                    polygonOptions: that.gmap.defaults,
-                    polylineOptions: that.gmap.defaults,
-                    rectangleOptions: that.gmap.defaults
+                    polygonOptions: markerOption,
+                    polylineOptions: markerOption,
+                    rectangleOptions: markerOption
                 });
 
                 that.gmap.drawingManager.setMap(that.gmap);
@@ -230,7 +232,7 @@
                 }
 
                 // center to polygon
-                if(wkt.type !== 'point'){
+                if (wkt.type !== 'point') {
                     var bound = new this.google.maps.LatLngBounds();
                     for (const pos of obj.getPath().g) {
                         var position = new this.google.maps.LatLng(pos.lat(), pos.lng())
