@@ -32,6 +32,7 @@
 
         mounted() {
             GoogleMapLoader.KEY = this.field.apiKey;
+            GoogleMapLoader.VERSION = '3.39';
             GoogleMapLoader.LIBRARIES = ['drawing']; // 'geometry', 'places', 'encoding'
             var that = this;
             GoogleMapLoader.load(function (google) {
@@ -134,15 +135,18 @@
                     obj.setMap(this.gmap); // Add it to the map
                     this.features.push(obj);
                 }
-
-                obj.setEditable(false);
-                // center to polygon
-                var bound = new this.google.maps.LatLngBounds();
-                for (const pos of obj.getPath().g) {
-                    var position = new this.google.maps.LatLng(pos.lat(), pos.lng())
-                    bound.extend(position)
+                if (obj.setEditable) {
+                    obj.setEditable(false);
                 }
-                this.gmap.fitBounds(bound);
+                if (wkt.type !== 'point') {
+                    // center to polygon
+                    var bound = new this.google.maps.LatLngBounds();
+                    for (const pos of obj.getPath().g) {
+                        var position = new this.google.maps.LatLng(pos.lat(), pos.lng());
+                        bound.extend(position)
+                    }
+                    this.gmap.fitBounds(bound);
+                }
 
                 return obj;
             },

@@ -36,6 +36,7 @@
 
         mounted() {
             GoogleMapLoader.KEY = this.field.apiKey;
+            GoogleMapLoader.VERSION = '3.39';
             GoogleMapLoader.LIBRARIES = ['drawing']; // 'geometry', 'places', 'encoding'
             var that = this;
             GoogleMapLoader.load(function (google) {
@@ -235,13 +236,15 @@
                 if (wkt.type !== 'point') {
                     var bound = new this.google.maps.LatLngBounds();
                     for (const pos of obj.getPath().g) {
-                        var position = new this.google.maps.LatLng(pos.lat(), pos.lng())
+                        var position = new this.google.maps.LatLng(pos.lat(), pos.lng());
                         bound.extend(position)
                     }
 
                     this.gmap.fitBounds(bound);
+                }
 
-                    if (this.field.readonly) {
+                if (this.field.readonly) {
+                    if (obj.setEditable) {
                         obj.setEditable(false);
                     }
                 }
